@@ -4,15 +4,16 @@ from helpers.dbhelpers import run_query
 import uuid
 import bcrypt
 
-# this endpoint is just for displaying public
-# movie information.
+# MOVIE SEARCH ENDPOINT!!! This is separate
+# from a list of movies. Aim to make it a 
+# "fuzzy search" - this optimizes data return
 
-# movie get request
-# public, anyone logged in or out can see any movie.
-# does not require token.
+# search get request
+# search for and display specific movies. 
+# anyone can do this.
 
 @app.get('/api/movie-search')
-def movie_get():
+def movie_search():
     pass
 
 # post, patch, delete not allowed here as that is for 
