@@ -25,7 +25,7 @@ def disconnect_db(conn,cursor):
         conn.close()
     
 
-def run_query(statement, args=None):
+def run_query(statement, args=[]):
     try:
         (conn, cursor) = connect_db()
         if statement.startswith("SELECT"):

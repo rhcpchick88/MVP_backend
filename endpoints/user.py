@@ -11,6 +11,8 @@ import bcrypt
 # displays user profile information. 
 # requires login token.
 
+
+
 @app.get('/api/user')
 def profile_get():
     # request a token header to verify the user is authenticated
@@ -20,7 +22,7 @@ def profile_get():
     else:
         token_check = run_query("SELECT id FROM user_session WHERE token=?", [token])
         user_id = token_check[0][0]
-        user_information = run_query("SELECT * FROM client WHERE id=?", [user_id])
+        user_information = run_query("SELECT * FROM user WHERE id=?", [user_id])
         resp = []
         for user in user_information:
             user_obj = {}
