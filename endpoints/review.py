@@ -1,9 +1,6 @@
 from app import app
 from flask import jsonify, request
 from helpers.dbhelpers import run_query
-from rapidfuzz import fuzz, process
-import uuid
-import bcrypt
 
 # reviews also have a "lookup table" with RATINGS. 
 # RATINGS are out of 5 and the reason they are posted 
@@ -120,4 +117,4 @@ def review_edit():
             return jsonify("Error updating review"), 422    
 
 # review delete request
-# not allowed
+# NOT ALLOWED

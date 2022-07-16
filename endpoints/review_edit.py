@@ -21,23 +21,59 @@ import bcrypt
 
 @app.get('/api/review-approval')
 def review_display():
-    pass
+    token = request.headers.get("token")
+    if not token:
+        return jsonify ("Error, not authorized"), 401
+    else:
+        token_check = run_query("SELECT id FROM user_session WHERE token=?", [token])
+        user_id = token_check[0][0]
+        admin_check = run_query("SELECT is_admin FROM user WHERE id=?", [user_id])
+        is_admin = admin_check[0][0]
+        if is_admin == 0:
+            return jsonify("Error, not authorized"), 401
+        else:
+            review_list = run_query("SELECT * FROM reviews WHERE is_approved=0")
+            return jsonify(review_list)
 
 # review post request
+# NOT ALLOWED. not for posting new review information.
+
+# review patch request
 # for approving specific reviews.
 # requires token
 
-@app.post('/api/review-approval')
+@app.patch('/api/review-approval')
 def review_approve():
-    pass
-
-# review patch request
-# NOT ALLOWED cannot edit others' reviews
+    token = request.headers.get("token")
+    if not token:
+        return jsonify ("Error, not authorized"), 401
+    else:
+        token_check = run_query("SELECT id FROM user_session WHERE token=?", [token])
+        user_id = token_check[0][0]
+        admin_check = run_query("SELECT is_admin FROM user WHERE id=?", [user_id])
+        is_admin = admin_check[0][0]
+        if is_admin == 0:
+            return jsonify("Error, not authorized"), 401    
+        else:
+            data = request.json
+            title = data.get("title")
+            if not title:
+                return jsonify("Error, missing required argument : movie title")
+            movie_check = run_query("SELECT id FROM movie WHERE title=?", [title])
+            if not movie_check:
+                return jsonify("Error, movie not in database"), 422
+            movie_id = movie_check[0][0]
+            review_check = run_query("SELECT id FROM reviews WHERE movie_id=? AND is_approved=0", [movie_id])
+            if not review_check:
+                return jsonify("Error, review not in database"), 422
+            review_id = review_check[0][0]
+            run_query("UPDATE reviews SET is_approved=1 WHERE id=?",[review_id])
+            return jsonify("Review approved")
+                    
+                    
+                
 
 # review delete request
-# for deleting & not approving reviews.
-# requires token.
-
-@app.delete('/api/review-approval')
-def review_disapprove():
-    pass
+# NOT ALLOWED cannot delete reviews.
+# the reviews are automatically not approved
+# so they won't show up anyways.
