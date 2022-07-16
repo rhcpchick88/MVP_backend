@@ -12,13 +12,29 @@ import bcrypt
 # It is optional.
 
 # review get request
-# for public it displays general reviews.
 # for admins and users, this displays their 
 # personal reviews. requires token for this
 
 @app.get('/api/reviews')
 def review_get():
-    pass
+    token = request.headers.get("token")
+    token_check = run_query("SELECT id FROM user_session WHERE token=?", [token])
+    user_id = token_check[0][0]
+    if not user_id:
+        review_list = run_query("SELECT * FROM review")
+        resp =[]
+        for review in review_list:
+            review_obj = {}
+            review_obj["id"] = review[0]
+            review_obj["review"] = review[1]
+            review_obj["userId"] = review[2]
+            review_obj["rating"] = review[3]
+            review_obj["movieId"] = review[4]
+            review_obj["isApproved"] = review[5]
+            resp.append(review_obj)
+        return jsonify(review_list),200
+    else:
+        user_review = run_query("SELECT id FROM review WHERE user_id=?", [user_id])
 
 
 # review post request

@@ -4,13 +4,12 @@ from flask import jsonify, request
 from helpers.dbhelpers import run_query
 from rapidfuzz import fuzz, process
 
-# MOVIE SEARCH ENDPOINT!!! This is separate
-# from a list of movies. Aim to make it a 
-# "fuzzy search" - this optimizes data return
+# this endpoint is just for displaying public
+# movie information.
 
-# search get request
-# search for and display specific movies. 
-# anyone can do this.
+# movie post request
+# public, anyone logged in or out can see any movie.
+# does not require token.
 
 
 @app.post('/api/movie-search')

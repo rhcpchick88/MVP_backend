@@ -12,7 +12,6 @@ import bcrypt
 # requires login token.
 
 
-
 @app.get('/api/user')
 def profile_get():
     # request a token header to verify the user is authenticated
@@ -23,7 +22,7 @@ def profile_get():
         token_check = run_query("SELECT id FROM user_session WHERE token=?", [token])
         user_id = token_check[0][0]
         user_information = run_query("SELECT * FROM user WHERE id=?", [user_id])
-        resp = []
+        profile_resp = []
         for user in user_information:
             user_obj = {}
             user_obj["email"] = user[1]
@@ -37,7 +36,7 @@ def profile_get():
             user_obj["adminStatus"] = user[11]
             user_obj["favoriteMovie"] = user[12]
             user_obj["favoriteGenre"] = user[13]
-            resp.append(user_obj)
+            profile_resp.append(user_obj)
         return jsonify(user_information), 200
 
 
