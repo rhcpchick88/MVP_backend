@@ -1,6 +1,7 @@
 from app import app
 from flask import jsonify, request
 from helpers.dbhelpers import run_query
+from rapidfuzz import fuzz, process
 import uuid
 import bcrypt
 
@@ -21,7 +22,9 @@ def review_get():
     token_check = run_query("SELECT id FROM user_session WHERE token=?", [token])
     user_id = token_check[0][0]
     if not user_id:
-        review_list = run_query("SELECT * FROM review")
+        return jsonify ("Error retrieving reviews, user not logged in"), 401
+    else:
+        review_list = run_query("SELECT * FROM reviews WHERE user_id=?", [user_id])
         resp =[]
         for review in review_list:
             review_obj = {}
@@ -33,8 +36,6 @@ def review_get():
             review_obj["isApproved"] = review[5]
             resp.append(review_obj)
         return jsonify(review_list),200
-    else:
-        user_review = run_query("SELECT id FROM review WHERE user_id=?", [user_id])
 
 
 # review post request
@@ -45,8 +46,36 @@ def review_get():
 
 @app.post('/api/reviews')
 def review_post():
-    pass
-
+    token = request.headers.get("token")
+    if not token:
+        return jsonify ("Error posting review, user not logged in"), 401    
+    else:        
+        data = request.json
+        review = data.get("review")
+        movie = data.get("movie")
+        rating = data.get("rating")
+        token_check = run_query("SELECT id FROM user_session WHERE token=?", [token])
+        if not token_check:
+            return jsonify("Error posting review, user not logged in"), 401
+        user_id = token_check[0][0]
+        movie_check = run_query("SELECT id FROM movie WHERE title=?", [movie])
+        if not movie_check:
+            return jsonify("Error, movie not in database"), 422              
+        movie_id = movie_check[0][0]  
+        rating_check = run_query("SELECT id FROM rating WHERE rating=?", [rating])
+        if not rating_check:
+            return jsonify("Error, must enter correct rating from 1 to 5"), 422
+        if not user_id:
+            return jsonify("Error posting review, user does not exist")        
+        if not review:
+            return jsonify ("Missing required argument : review"), 422
+        if not movie:
+            return jsonify ("Missing required argument : movie"), 422        
+        else:
+            run_query("INSERT INTO reviews (review, user_id, rating, movie_id) VALUES (?,?,?,?)", [review, user_id, rating, movie_id])
+            return jsonify("Review added successfully"), 201
+    
+    
 # review patch request
 # allows user to edit their reviews and rating if
 # they please.
