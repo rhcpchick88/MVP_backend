@@ -43,6 +43,7 @@ def review_get():
 # refer to the movie uploaded in the database to post
 # a review.
 # requires token.
+# TODO cant add another review if the review exists for the movie id and user id
 
 @app.post('/api/reviews')
 def review_post():
@@ -83,13 +84,40 @@ def review_post():
 
 @app.patch('/api/reviews')
 def review_edit():
-    pass
+    token = request.headers.get("token")
+    if not token:
+        return jsonify ("Error editing review, user not logged in"), 401
+    else:
+        data = request.json
+        review = data.get("review")
+        rating = data.get("rating")
+        movie = data.get("movie")
+        if not movie:
+            return jsonify("Missing required argument: Movie")
+        token_check = run_query("SELECT id FROM user_session WHERE token=?", [token])
+        if not token_check:
+            return jsonify("Error editing review, user not logged in"), 401
+        user_id = token_check[0][0]
+        movie_check = run_query("SELECT id FROM movie WHERE title=?", [movie])
+        if not movie_check:
+            return jsonify("Error, movie not in database"), 422              
+        movie_id = movie_check[0][0]
+        review_check = run_query("SELECT id FROM reviews WHERE user_id=? AND movie_id=?", [user_id, movie_id])
+        if not review_check:
+            return jsonify("Error, entry does not exist"), 422
+        review_id = review_check[0][0]
+        if review:
+            run_query("UPDATE reviews SET review=?, is_approved=0 WHERE id=?", [review, review_id])
+            return jsonify("Review updated successfully")
+        if rating:
+            rating_check = run_query("SELECT id FROM rating WHERE rating=?", [rating])
+            if not rating_check:
+                return jsonify("Error, must enter correct rating from 1 to 5"), 422
+            else:
+                run_query("UPDATE reviews SET rating=? WHERE id=?", [rating, review_id])    
+                return jsonify("Rating updated successfully")
+        else:
+            return jsonify("Error updating review"), 422    
 
 # review delete request
-# allows user to delete their reviews if desired.
-# requires token.
-
-@app.delete('/api/reviews')
-def review_delete():
-    pass
-
+# not allowed
