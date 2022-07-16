@@ -64,7 +64,10 @@ def review_post():
         if not rating_check:
             return jsonify("Error, must enter correct rating from 1 to 5"), 422
         if not user_id:
-            return jsonify("Error posting review, user does not exist")        
+            return jsonify("Error posting review, user does not exist")   
+        review_check = run_query("SELECT id FROM reviews WHERE user_id=? AND movie_id=?", [user_id, movie_id])    
+        if review_check:
+            return jsonify("Error, user already uploaded review")
         if not review:
             return jsonify ("Missing required argument : review"), 422
         if not movie:
@@ -88,7 +91,7 @@ def review_edit():
         data = request.json
         review = data.get("review")
         rating = data.get("rating")
-        movie = data.get("movie")
+        movie = data.get("title")
         if not movie:
             return jsonify("Missing required argument: Movie")
         token_check = run_query("SELECT id FROM user_session WHERE token=?", [token])
