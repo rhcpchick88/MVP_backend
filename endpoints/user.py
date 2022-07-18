@@ -59,6 +59,10 @@ def profile_create():
     pictureThree = data.get("pictureThree")
     favoriteMovie = data.get("favoriteMovie")
     favoriteGenre = data.get("favoriteGenre")
+    email_check = run_query("SELECT id FROM user WHERE email=?",[email])
+    user_id = email_check[0][0]
+    if user_id:
+        return jsonify("Error, user already exists")
     if not email:
         return jsonify ("Missing required argument: email"), 422
     if not username:
@@ -74,11 +78,11 @@ def profile_create():
     run_query("INSERT INTO user (email, username, password, first_name, last_name, about_me, picture_one, picture_two, picture_three, favorite_movie, genre) VALUES (?,?,?,?,?,?,?,?,?,?,?)", [email, username, hashed_password, firstName, lastName, aboutMe, pictureOne, pictureTwo, pictureThree, favoriteMovie, favoriteGenre])
     # creating a token for user as profile creation will log the user in automatically
     # hexing the UUID to remove dashes
-    user_token = uuid.uuid4().hex
+    token = uuid.uuid4().hex
     user_check = run_query("SELECT id FROM user WHERE email=?", [email])
     user_id = user_check[0][0]
-    run_query("INSERT INTO user_session (id, token) VALUES (?,?)", [user_id, user_token])
-    return jsonify("User added successfully"), 201
+    run_query("INSERT INTO user_session (id, token) VALUES (?,?)", [user_id, token])
+    return jsonify([token]), 201
 
 
 # user patch request

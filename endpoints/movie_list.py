@@ -12,7 +12,7 @@ from helpers.dbhelpers import run_query
 
 @app.get('/api/movie-list')
 def movie_get():
-    movie_info = run_query("SELECT * FROM movie")
+    movie_info = run_query("SELECT * FROM movie ORDER BY title")
     movie_resp = []
     for movie in movie_info:
         movie_obj = {}
@@ -25,6 +25,7 @@ def movie_get():
         # print(response)
         movie_resp.append(movie_obj)
     return jsonify(movie_resp)
+
 
 # review post request
 # public, anyone logged in or out can see any review.
