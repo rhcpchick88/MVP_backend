@@ -27,12 +27,13 @@ def movie_search():
         # ideal search results (ex batman would just return batman, not batman forever)
         result=process.extract(choice, movie, scorer=fuzz.token_ratio)
         # Looping through the results and appending the response
-        # with each item in the search result that scored a match of "80" or above.
+        # with each item in the search result that scored a match of "80" or above. 
         for item in result:
             # the second item in the tuple represents match score
             if item[1] >= 80:
-                print(result)
-                resp.append(result)
+                movie_id=run_query("SELECT id FROM movie WHERE title=?",[result[0][0]])
+                resp.append(result+movie_id)
+                
     return jsonify(resp)
     
     #TODO ERROR CODE - I PUT AN ERROR CODE IN IF ELSE 

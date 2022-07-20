@@ -35,7 +35,9 @@ def movie_get():
 def review_search():
     data = request.json
     movie_id = data.get("movieId")
-    review_list = run_query("SELECT * FROM reviews WHERE movie_id=?", [movie_id])    
+    review_list = run_query("SELECT * FROM reviews WHERE movie_id=?", [movie_id])
+    movie_result = run_query("SELECT title FROM movie WHERE id=?",[movie_id])
+    movie_title=movie_result[0][0]
     review_resp = []
     for review in review_list:
         review_obj={}
@@ -45,6 +47,7 @@ def review_search():
         review_obj["rating"] = review[3]
         review_obj["movieId"] = review[4]
         review_obj["isApproved"] = review[5]
+        review_obj["title"] = movie_title
         review_resp.append(review_obj)
     return jsonify(review_resp)
 
