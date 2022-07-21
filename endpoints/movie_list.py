@@ -34,22 +34,28 @@ def movie_get():
 @app.post('/api/movie-list')
 def review_search():
     data = request.json
-    movie_id = data.get("movieId")
-    review_list = run_query("SELECT * FROM reviews WHERE movie_id=?", [movie_id])
-    movie_result = run_query("SELECT title FROM movie WHERE id=?",[movie_id])
-    movie_title=movie_result[0][0]
-    review_resp = []
-    for review in review_list:
-        review_obj={}
-        review_obj["id"] = review[0]
-        review_obj["review"] = review[1]
-        review_obj["userId"] = review[2]
-        review_obj["rating"] = review[3]
-        review_obj["movieId"] = review[4]
-        review_obj["isApproved"] = review[5]
-        review_obj["title"] = movie_title
-        review_resp.append(review_obj)
-    return jsonify(review_resp)
+    name = data.get("reviewSearch")
+    movie_result = run_query("SELECT * FROM movie WHERE title=?", [name])
+    # movie result gives a list of the movies, as there may be multiple
+    # movies with the same name (ex remakes)
+    for movie in movie_result:
+        movie_id=movie[0]
+        # grabbing the ID from the movie so I can use it to pull the reviews
+        review_result=run_query("SELECT * FROM reviews WHERE movie_id=?",[movie_id])
+        print(review_result)
+        review_resp=[]
+        for review in review_result:
+            review_obj={}
+            review_obj["id"]=review[0]
+            review_obj["review"]=review[1]
+            review_obj["user_id"]=review[2]
+            review_obj["rating"]=review[3]
+            review_obj["is_approved"]=review[4]
+            review_resp.append(review_obj)
+    if review_resp is None:
+        return jsonify("No existing reviews")
+    else:
+        return jsonify(review_resp)
 
 
 
